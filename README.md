@@ -27,7 +27,11 @@ Thanks to the lift-to-wake functionality and ESP-NOW, remote responsiveness is e
 
 I did consider using BLE to simplify the hub setup, but nearly all my research pointed to ESP-NOW as the better choice. Since ESP-NOW transmissions are so lightweight, there was little benefit to placing the IR blaster on the remote itself; the trade-off is that IR control is now limited to the same room as the hub.
 
-Looking ahead, I’d like to integrate a USB-C port into the hub, turning it into a combined charging dock and control center. With continuous power available, the hub can easily support additional sensors or modules as needed.
+Looking ahead, I’d like to integrate a USB-C port into the hub, turning it into a combined charging dock and control center. With continuous power available, the hub can easily support additional sensors or modules as needed. I rushed the case a bit too in order to just get something in place, it would be nice for this to look a bit more professional. 
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/57b47ade-cae5-478f-a5b9-a601ba0e54f5" alt="Picture of remote hub internals" width="350"/>
+</p>
 
 ## Interested?
 
@@ -38,7 +42,7 @@ ESPHome before so a lot of the code was generated with help from an LLM (with **
 
 More detailed readme files are in each directory.
 
-- 3D models that remove the power button cutout and also provides a couple extra screw holes that are large enough for heat set inserts for a more rigid case.
+- [3D models](https://www.printables.com/model/1477693-everything-remote-top-and-bottom-screwsno-power-op) that remove the power button cutout and also provides a couple extra screw holes that are large enough for heat set inserts for a more rigid case.
 - hub_a_espnow.ino: Flash this to the D1 running ESP-NOW, I use the Arduino IDE. Flash this first as you'll need the MAC address for the remote.
 - hub_b_esphome.yaml: Flash this to the D1 running ESPHome, use the normal ESPHome builder.
 - remote.ino: Flash this to the remote, I use the Arduino IDE.
