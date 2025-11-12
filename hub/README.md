@@ -1,5 +1,11 @@
 # Central hub
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/57b47ade-cae5-478f-a5b9-a601ba0e54f5" alt="Top of hub internals showing D1 boards, IR blaster and USB-C power board" width="350"/>
+  <img src="https://github.com/user-attachments/assets/27d2cd1d-a517-47e4-a237-deb82bc672f5" alt="Bottom of hub internals showing IR receiver" width="350"/>
+  <img src="https://github.com/user-attachments/assets/4516c2f7-1351-4f1c-bd11-a36e4846553b" alt="Basic hub casing" width="350"/>
+</p>
+
 ### Hardware
 
 You'll need: 
