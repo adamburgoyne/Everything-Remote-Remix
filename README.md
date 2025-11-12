@@ -12,6 +12,11 @@ I experimented with a basic tilt sensor (KY-020), but it proved too insensitive,
 
 This setup performs well: in most cases, a natural “remote-lifting” motion wakes the device instantly, registering immediate button presses. After a configurable timeout, the remote returns to sleep mode. If the lift doesn’t trigger, a gentle shake reliably does. The relatively short timeout also helps conserve battery life if the remote is jostled around on the sofa, though the sensor requires a fairly distinct motion to activate.
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/50f4b0ec-de1b-47e9-a910-e0d7976037ac" alt="Remote showing vibration sensor in top right corner" width="350"/>
+  <img src="https://github.com/user-attachments/assets/0c32f2b1-6a84-488d-a1ad-759b4167129c" alt="Close up of vibration sensor" width="350"/>
+</p>
+
 ## Central hub
 
 Instead of running ESPHome directly on the remote (which requires a full Wi-Fi connection each time it wakes), the remote now uses a lightweight ESP-NOW program that communicates with a central hub, which then forwards commands to Home Assistant.
