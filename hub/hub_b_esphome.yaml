@@ -1,0 +1,151 @@
+esphome:
+  name: everything_remote_hub
+  friendly_name: Everything Remote Hub
+  min_version: 2025.9.0
+  name_add_mac_suffix: false
+
+esp8266:
+  board: esp01_1m
+
+# Enable logging
+logger:
+
+# Allow Over-The-Air updates
+ota:
+  - platform: esphome
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+
+# --- START OF IR ---
+
+# --- IR Transmitter ---
+remote_transmitter:
+  id: transmitter
+  pin: 4
+  carrier_duty_percent: 50%
+
+# Enable Home Assistant API
+api:
+  services:
+    - service: send_samsung_ir
+      variables:
+        data: string
+        nbits: int
+      then:
+        - remote_transmitter.transmit_samsung:
+            data: !lambda 'return strtoul(data.c_str(), NULL, 0);'
+            nbits: !lambda 'return nbits;'
+
+# --- IR Receiver (multi-protocol) ---
+remote_receiver:
+  pin:
+    number: 14
+    inverted: true
+    mode:
+      input: true
+      pullup: true
+  dump: all
+
+  # NEC protocol
+  on_nec:
+    then:
+      - text_sensor.template.publish:
+          id: last_ir_code
+          state: !lambda |-
+            char buf[64];
+            sprintf(buf, "NEC addr=0x%04X cmd=0x%02X", x.address, x.command);
+            return {buf};
+
+  # Sony protocol
+  on_sony:
+    then:
+      - text_sensor.template.publish:
+          id: last_ir_code
+          state: !lambda |-
+            char buf[64];
+            sprintf(buf, "Sony data=0x%04X bits=%d", x.data, x.nbits);
+            return {buf};
+
+  # Samsung protocol
+  on_samsung:
+    then:
+      - text_sensor.template.publish:
+          id: last_ir_code
+          state: !lambda |-
+            char buf[64];
+            sprintf(buf, "Sony data=0x%04X bits=%d", x.data, x.nbits);
+            return {buf};
+
+# --- END OF IR ---
+
+# --- Publish last received code to Home Assistant ---
+text_sensor:
+  - platform: template
+    name: "Last IR Code"
+    id: last_ir_code
+
+# UART bus
+uart:
+  id: uart_bus
+  tx_pin: 1
+  rx_pin: 3
+  baud_rate: 115200
+
+globals:
+  - id: last_uart_msg
+    type: std::string
+    restore_value: no
+    initial_value: ""
+  - id: last_event_time
+    type: uint32_t
+    restore_value: no
+    initial_value: "0"
+  - id: last_code
+    type: uint32_t
+    restore_value: no
+    initial_value: "0"
+  - id: last_protocol
+    type: std::string
+    restore_value: no
+    initial_value: ""
+
+interval:
+  - interval: 50ms
+    then:
+      - lambda: |-
+          static std::string buffer = "";
+          uint32_t now_ms = millis();
+
+          while (Serial.available()) {
+              char c = (char)Serial.read();
+
+              // Ignore carriage returns completely
+              if (c == '\r') continue;
+
+              if (c == '\n') {
+                  // Debounce: ignore events within 200ms
+                  if (now_ms - id(last_event_time) >= 200) {
+                      // Ensure we send a string even if buffer is empty
+                      id(last_uart_msg) = buffer.empty() ? "0" : buffer;
+
+                      ESP_LOGD("uart", "Sending to HA: %s", id(last_uart_msg).c_str());
+                      id(trigger_remote_event).execute();
+
+                      id(last_event_time) = now_ms;
+                  }
+                  buffer.clear();
+              } else {
+                  buffer += c;
+              }
+          }
+
+script:
+  - id: trigger_remote_event
+    then:
+      - homeassistant.event:
+          event: esphome.remote_button_pressed
+          data:
+            message: !lambda 'return id(last_uart_msg);'
